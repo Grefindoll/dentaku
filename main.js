@@ -8,6 +8,8 @@ const buttons = document.querySelectorAll('.btn');
 let currentNumber = '0';    // 現在表示されている数字（文字列で管理）
 let firstNumber = null;     // 計算の最初に保存される数値
 let operator = null;        // 演算子（+、-、×、÷）
+let newNumber = false;  //new    trueなら新しい入力、という意味
+
 
 //現在の数字をディスプレイに表示
 function updateDisplay() {
@@ -25,55 +27,93 @@ function clear() {
   currentNumber = '0';
   firstNumber = null;
   operator = null;
+  newNumber = false; //new 追加した。
 }
 
 
 function calculateResult(a, b, op) {
-  // 各演算子に応じて計算を実行
   switch (op) {
-    case '+': return a + b; // 足し算
-    case '-': return a - b; // 引き算
-    case '×': return a * b; // 掛け算
-    case '÷': return a / b; // 割り算
-    default: return b;      // 演算子が無効の場合、現在の数字をそのまま返す
+    case '+': return a + b;
+    case '-': return a - b;
+    case '×': return a * b;
+    case '÷': return b === 0 ? NaN : a / b;
+    default: return b;
   }
 }
 
+// 小数点以下の不要なゼロを削除
+function formatNumber(num) {
+  return num.toString().replace(/(\..*?[1-9])0+$/, '$1').replace(/\.$/, '');
+}
 
+
+
+//＝イコールが入力されたときに、計算して答えを出す
 function calculate() {
-  //計算して答えを出す
-  if (operator && currentNumber !== '') {
-    currentNumber = String(calculateResult(firstNumber, parseFloat(currentNumber), operator));
+  if (operator && firstNumber !== null) {
+    const result = calculateResult(
+      firstNumber, 
+      parseFloat(currentNumber), 
+      operator
+    );
+
+    if  (isNaN(result)) {
+      currentNumber = 'Error';
+    } else {
+      currentNumber = formatNumber(result);
+    }
 
     operator = null;
     firstNumber = null;
+    newNumber = true;
   }
 }
 
 
 
-
+// '+', '-', '×', '÷'が入力された時
 function setOperator(operatorSymbol) {
-  //演算子処理
+  if (currentNumber === 'Error') return;
+
   if (firstNumber === null) {
     firstNumber = parseFloat(currentNumber);
   } else if (operator) {
     //もし演算子が入力されたなら
-    firstNumber = calculateResult(firstNumber, parseFloat(currentNumber), operator)
+    firstNumber = calculateResult(
+      firstNumber, 
+      parseFloat(currentNumber), 
+      operator
+    )
   }
   //次に使用する演算子を保存
   operator = operatorSymbol;
-  //次の数字入力を待つために表示をリセット
-  currentNumber = '';
+  newNumber = true; //new
+
+  // 次の数字入力を待つために表示を更新
+  updateDisplay();
 }
 
 
 
 function inputNumber(number) {
-  //小数点が押された時
-  if (number === '.' && currentNumber.includes('.')){
+  if (currentNumber === 'Error') clear();
+
+  if (newNumber) {
+    currentNumber = number === '.' ?'0.' : number ;
+    newNumber = false; 
     return;
   }
+
+
+  // 小数点が押された時
+  if (number === '.') {
+    if (!currentNumber.includes('.')) {
+      currentNumber += '.';
+    }
+    return;
+  }
+
+  
   //最初に00ボタンが押された時
   if (currentNumber === '0' && number === '00') {
     return;
