@@ -9,11 +9,17 @@ let currentNumber = '0';    // 現在表示されている数字（文字列で�
 let firstNumber = null;     // 計算の最初に保存される数値
 let operator = null;        // 演算子（+、-、×、÷）
 let newNumber = false;  //new    trueなら新しい入力、という意味
+let currentExpression = '';  //new  計算式を保持
 
 
 //現在の数字をディスプレイに表示
 function updateDisplay() {
-  display.value = currentNumber;
+  if (newNumber) {
+    display.value =  currentExpression;
+  } else {
+    display.value = currentExpression + currentNumber;
+  }
+
 }
 
 
@@ -28,6 +34,9 @@ function clear() {
   firstNumber = null;
   operator = null;
   newNumber = false; //new 追加した。
+  currentExpression = '';
+  updateDisplay();
+
 }
 
 
@@ -62,10 +71,12 @@ function calculate() {
     } else {
       currentNumber = formatNumber(result);
     }
+    display.value = currentNumber;
 
     operator = null;
     firstNumber = null;
     newNumber = true;
+    currentExpression = '';
   }
 }
 
@@ -84,7 +95,11 @@ function setOperator(operatorSymbol) {
       parseFloat(currentNumber), 
       operator
     )
+
   }
+
+  currentExpression = `${currentExpression}${currentNumber} ${operatorSymbol} `;
+
   //次に使用する演算子を保存
   operator = operatorSymbol;
   newNumber = true; //new
@@ -101,29 +116,28 @@ function inputNumber(number) {
   if (newNumber) {
     currentNumber = number === '.' ?'0.' : number ;
     newNumber = false; 
-    return;
-  }
-
-
-  // 小数点が押された時
-  if (number === '.') {
-    if (!currentNumber.includes('.')) {
-      currentNumber += '.';
-    }
-    return;
-  }
-
-  
-  //最初に00ボタンが押された時
-  if (currentNumber === '0' && number === '00') {
-    return;
-  }
-  //先頭が0 で数字が押された時
-  if(currentNumber === '0' && number !== '.') {
-    currentNumber = number;
   } else {
-    currentNumber += number;
+    // 小数点が押された時
+    if (number === '.') {
+      if (!currentNumber.includes('.')) {
+        currentNumber += '.';
+      }
+    }
+
+    
+    //最初に00ボタンが押された時
+    if (currentNumber === '0' && number === '00') {
+      currentNumber = '0';
+    }
+    //先頭が0 で数字が押された時
+    if(currentNumber === '0' && number !== '.') {
+      currentNumber = number;
+    } else {
+      currentNumber += number;
+    }
   }
+
+  updateDisplay();
 }
 
 
@@ -153,8 +167,6 @@ buttons.forEach(button => {
     } else  {//数字や小数点が押された時
       inputNumber(buttonText);  
     }
-
-    updateDisplay();
   });
 });
 
