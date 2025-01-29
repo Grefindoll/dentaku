@@ -8,8 +8,8 @@ const buttons = document.querySelectorAll('.btn');
 let currentNumber = '0';    // 現在表示されている数字（文字列で管理）
 let firstNumber = null;     // 計算の最初に保存される数値
 let operator = null;        // 演算子（+、-、×、÷）
-let newNumber = false;  //new    trueなら新しい入力、という意味
-let currentExpression = '';  //new  計算式を保持
+let newNumber = false;  //new    falseなら、今の数字を続けて入力するという意味。trueなら、演算子を押した直後。
+let currentExpression = '';  //new  どんな計算をしているか文字で覚える
 
 
 //現在の数字をディスプレイに表示
@@ -85,6 +85,14 @@ function calculate() {
 // '+', '-', '×', '÷'が入力された時
 function setOperator(operatorSymbol) {
   if (currentNumber === 'Error') return;
+  //演算子が連続して入力されたら、後に入力された演算子を上書き
+  if (operator && newNumber) {
+    currentExpression = currentExpression.replace(/[\+\-\×\÷]\s*$/, '');
+    operator = operatorSymbol
+    currentExpression += `${operatorSymbol} `;
+    updateDisplay();
+    return;
+  }
 
   if (firstNumber === null) {
     firstNumber = parseFloat(currentNumber);
