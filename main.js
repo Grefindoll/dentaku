@@ -118,30 +118,36 @@ function setOperator(operatorSymbol) {
 
 
 
+//数字や小数点が押された時
 function inputNumber(number) {
   if (currentNumber === 'Error') clear();
 
   if (newNumber) {
-    currentNumber = number === '.' ?'0.' : number ;
-    newNumber = false; 
+    // 新しい数値の入力開始時
+    if (number === '.') {
+      currentNumber = '0.'; // 小数点を入力する場合
+    } else {
+      currentNumber = number; // 数字を入力する場合
+    }
+    newNumber = false;
   } else {
-    // 小数点が押された時
+    // 既存の数値に追加する場合
     if (number === '.') {
       if (!currentNumber.includes('.')) {
-        currentNumber += '.';
+        currentNumber += '.'; // 小数点が含まれていない場合のみ追加
       }
-    }
-
-    
-    //最初に00ボタンが押された時
-    if (currentNumber === '0' && number === '00') {
-      currentNumber = '0';
-    }
-    //先頭が0 で数字が押された時
-    if(currentNumber === '0' && number !== '.') {
-      currentNumber = number;
+    } else if (number === '00') {
+      // 00ボタンの処理
+      if (currentNumber !== '0') {
+        currentNumber += '00'; // 先頭が0でない場合のみ00を追加
+      }
     } else {
-      currentNumber += number;
+      // 数字を追加
+      if (currentNumber === '0') {
+        currentNumber = number; // 先頭が0の場合は上書き
+      } else {
+        currentNumber += number; // それ以外は追加
+      }
     }
   }
 
